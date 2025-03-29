@@ -1,0 +1,194 @@
+[gd_scene load_steps=9 format=3 uid="uid://b3bbd67fobvum"]
+
+[ext_resource type="PackedScene" uid="uid://dowqk6onm3c84" path="res://RVCar.tscn" id="1_ra5da"]
+[ext_resource type="Texture2D" uid="uid://dy1g88wper831" path="res://gLTF/Windows.png" id="2_y7ix6"]
+
+[sub_resource type="GDScript" id="GDScript_6soy1"]
+script/source = "extends VehicleBody3D
+
+@export var custom_engine_force := 3000.0
+@export var brake_force := 120.0
+@export var handbrake_force := 500.0
+@export var max_steering_angle := 0.4 # in radians (~23°)
+@export var gear_count := 6
+
+var steering_input := 0.0
+var throttle := 0.0
+var braking := false
+var handbraking := false
+var current_gear := 1
+var clutch_engaged := false
+var manual_transmission := false
+
+
+func _physics_process(_delta):
+	handle_input()
+	update_vehicle()
+
+func handle_input():
+	# Steering
+	steering_input = Input.get_action_strength(\"InGame_Steer.Left\") - Input.get_action_strength(\"InGame_Steer.Right\")
+	steering_input *= max_steering_angle
+
+	# Acceleration & Reversing & Braking
+	throttle = Input.get_action_strength(\"InGame_Accelerate\")
+	if engine_force == 0 and not manual_transmission:
+		throttle = Input.get_action_strength(\"InGame_Reverse\") * -1
+	braking = Input.is_action_pressed(\"InGame_Brake\")
+	handbraking = Input.is_action_pressed(\"InGame_HandBrake\")
+
+	# Horn (just logs here)
+	if Input.is_action_just_pressed(\"InGame_Horn\"):
+		print(\"Honk!\")
+
+	# Signals (just logs for now)
+	if Input.is_action_just_pressed(\"InGame_Signals.Left\"):
+		print(\"Left signal!\")
+	if Input.is_action_just_pressed(\"InGame_Signals.Right\"):
+		print(\"Right signal!\")
+
+	# Manual Gear Control
+	if manual_transmission:
+		if Input.is_action_just_pressed(\"InGame_Gear.Up\"):
+			current_gear = min(current_gear + 1, gear_count)
+			print(\"Gear:\", current_gear)
+		if Input.is_action_just_pressed(\"InGame_Gear.Down\"):
+			current_gear = max(current_gear - 1, 1)
+			print(\"Gear:\", current_gear)
+		if Input.is_action_just_pressed(\"InGame_Clutch\"):
+			clutch_engaged = !clutch_engaged
+			print(\"Clutch:\", clutch_engaged)
+
+func update_vehicle():
+	# Steering only applies to front wheels
+	get_node(\"WheelFL\").steering = steering_input
+	get_node(\"WheelFR\").steering = steering_input
+
+	# Engine force logic
+	var applied_engine_force = custom_engine_force * throttle
+	if manual_transmission and not clutch_engaged:
+		applied_engine_force = 0.0
+
+	apply_engine_force(applied_engine_force)
+
+	# Braking
+	var total_brake = brake_force if braking else 0.0
+	apply_brake(total_brake)
+
+	# Handbrake (rear wheels only)
+	if handbraking:
+		get_node(\"WheelRL\").brake = handbrake_force
+		get_node(\"WheelRR\").brake = handbrake_force
+	else:
+		get_node(\"WheelRL\").brake = 0.0
+		get_node(\"WheelRR\").brake = 0.0
+
+func apply_engine_force(force):
+	for wheel_name in [\"WheelRL\", \"WheelRR\"]: # Rear only!
+		get_node(wheel_name).engine_force = force
+
+func apply_brake(force):
+	for wheel_name in [\"WheelFL\", \"WheelFR\", \"WheelRL\", \"WheelRR\"]:
+		get_node(wheel_name).brake = force
+"
+
+[sub_resource type="GDScript" id="GDScript_axiq8"]
+script/source = "extends Node3D
+
+@export var target_path: NodePath
+@export var follow_speed := 5.0
+@export var mouse_sensitivity := 0.005
+@export var zoom_speed := 1.2
+@export var min_zoom := 3.0
+@export var max_zoom := 20.0
+@export var zoom_smoothness := 8.0
+
+var yaw := 0.0
+var pitch := 0.0
+var zoom_target := 10.0
+var zoom_current := 10.0
+var target: Node3D = null
+
+func _ready():
+	target = get_node_or_null(target_path)
+	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+
+func _unhandled_input(event):
+	if event is InputEventMouseMotion and Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+		yaw -= event.relative.x * mouse_sensitivity
+		pitch -= event.relative.y * mouse_sensitivity
+		pitch = clamp(pitch, -0.5, 0.5)
+
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			zoom_target = max(min_zoom, zoom_target / zoom_speed)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			zoom_target = min(max_zoom, zoom_target * zoom_speed)
+
+func _process(delta):
+	if not target:
+		return
+
+	# Smooth position follow
+	global_position = global_position.lerp(target.global_transform.origin, delta * follow_speed)
+	$SpringArm3D.position = target.global_transform.origin - global_position
+
+	# Smooth zoom transition
+	zoom_current = lerp(zoom_current, zoom_target, delta * zoom_smoothness)
+
+	# Rotate SpringArm relative to target
+	var spring_arm = $SpringArm3D
+	if spring_arm:
+		var base_rot = target.global_transform.basis.get_euler()
+		spring_arm.rotation = Vector3(pitch, yaw, 0) + Vector3(0, base_rot.y, 0)
+		spring_arm.spring_length = zoom_current
+"
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_oi5jy"]
+size = Vector3(100, 0.1, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0w6if"]
+albedo_texture = ExtResource("2_y7ix6")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_8khdy"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_yw6vk"]
+material = SubResource("StandardMaterial3D_8khdy")
+size = Vector2(100, 100)
+
+[node name="Node3D" type="Node3D"]
+
+[node name="RVCar" parent="." instance=ExtResource("1_ra5da")]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 0, 0.298204, 0)
+mass = 800.0
+gravity_scale = 1.5
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -1, 0)
+linear_damp = 0.4
+angular_damp = 0.8
+script = SubResource("GDScript_6soy1")
+
+[node name="CameraRig" type="Node3D" parent="."]
+script = SubResource("GDScript_axiq8")
+target_path = NodePath("../RVCar")
+
+[node name="SpringArm3D" type="SpringArm3D" parent="CameraRig"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.15722, 0)
+spring_length = 10.0
+
+[node name="Camera3D" type="Camera3D" parent="CameraRig/SpringArm3D"]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.707107, 0.5, -0.5, 0, 0.707107, 0.707107, 0.707107, -0.5, 0.5, 0, 0, 0)
+
+[node name="StaticBody3D" type="StaticBody3D" parent="."]
+transform = Transform3D(0.203589, 0, 0, 0, 1, 0, 0, 0, 0.2151, 0, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="StaticBody3D"]
+transform = Transform3D(100, 0, 0, 0, 2, 0, 0, 0, 100, 0, 0, 0)
+shape = SubResource("BoxShape3D_oi5jy")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="StaticBody3D"]
+transform = Transform3D(100, 0, 0, 0, 100, 0, 0, 0, 100, 0, 0, 0)
+material_override = SubResource("StandardMaterial3D_0w6if")
+mesh = SubResource("PlaneMesh_yw6vk")
