@@ -443,9 +443,9 @@ distance_fade_enabled = true
 distance_fade_begin = 0.0
 distance_fade_shadow = 0.0
 spot_range = 0.346645
-spot_angle = 35.0
+spot_angle = 15.0
 
-[node name="LightBottom2" type="SpotLight3D" parent="Lights/LightsFL"]
+[node name="VisualLight" type="SpotLight3D" parent="Lights/LightsFL"]
 transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -2.40588, 0.276399, 0.544553)
 light_energy = 16.0
 shadow_enabled = true
@@ -453,9 +453,9 @@ distance_fade_enabled = true
 distance_fade_begin = 0.0
 distance_fade_shadow = 0.0
 spot_range = 0.346645
-spot_angle = 35.0
+spot_angle = 15.0
 
-[node name="LightBottom" type="SpotLight3D" parent="Lights/LightsFL"]
+[node name="HeadLight" type="SpotLight3D" parent="Lights/LightsFL"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -2.13414, 0.276955, 0.543872)
 light_energy = 16.0
 shadow_enabled = true
@@ -473,9 +473,9 @@ distance_fade_enabled = true
 distance_fade_begin = 0.0
 distance_fade_shadow = 0.0
 spot_range = 0.346645
-spot_angle = 35.0
+spot_angle = 15.0
 
-[node name="LightBottom2" type="SpotLight3D" parent="Lights/LightsFR"]
+[node name="VisualLight" type="SpotLight3D" parent="Lights/LightsFR"]
 transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, -2.40588, 0.276399, -0.544438)
 light_energy = 16.0
 shadow_enabled = true
@@ -483,9 +483,9 @@ distance_fade_enabled = true
 distance_fade_begin = 0.0
 distance_fade_shadow = 0.0
 spot_range = 0.346645
-spot_angle = 35.0
+spot_angle = 15.0
 
-[node name="LightBottom" type="SpotLight3D" parent="Lights/LightsFR"]
+[node name="HeadLight" type="SpotLight3D" parent="Lights/LightsFR"]
 transform = Transform3D(-4.37114e-08, 0, 1, 0, 1, 0, -1, 0, -4.37114e-08, -2.13414, 0.279328, -0.544475)
 light_energy = 16.0
 shadow_enabled = true
@@ -503,10 +503,26 @@ distance_fade_enabled = true
 distance_fade_begin = 0.0
 distance_fade_shadow = 0.0
 spot_range = 0.346645
-spot_angle = 35.0
+spot_angle = 15.0
 
-[node name="LightBttom" type="SpotLight3D" parent="Lights/LightsRL"]
-transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 1.93845, 0.276955, 0.543872)
+[node name="VisualLight" type="SpotLight3D" parent="Lights/LightsRL"]
+transform = Transform3D(-2.18557e-07, 0, 1, 0, 1, 0, -1, 0, -2.18557e-07, 2.267, 0.35, 0.631)
+light_color = Color(1, 0, 0, 1)
+light_energy = 5.0
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 0.0
+distance_fade_shadow = 0.0
+spot_range = 0.346645
+spot_angle = 15.0
+
+[node name="RearLight" type="SpotLight3D" parent="Lights/LightsRL"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.95557, 0.35, -0.631)
+light_color = Color(1, 0, 0, 1)
+light_energy = 16.0
+shadow_enabled = true
+distance_fade_enabled = true
+spot_range = 10.0
 
 [node name="LightsRR" type="Node3D" parent="Lights"]
 
@@ -519,7 +535,23 @@ distance_fade_enabled = true
 distance_fade_begin = 0.0
 distance_fade_shadow = 0.0
 spot_range = 0.346645
-spot_angle = 35.0
+spot_angle = 15.0
 
-[node name="LightBottom" type="SpotLight3D" parent="Lights/LightsRR"]
-transform = Transform3D(1.31134e-07, 0, -1, 0, 1, 0, 1, 0, 1.31134e-07, 1.93845, 0.276955, -0.544438)
+[node name="VisualLight" type="SpotLight3D" parent="Lights/LightsRR"]
+transform = Transform3D(-2.18557e-07, 0, 1, 0, 1, 0, -1, 0, -2.18557e-07, 2.267, 0.35, -0.631)
+light_color = Color(1, 0, 0, 1)
+light_energy = 5.0
+shadow_enabled = true
+distance_fade_enabled = true
+distance_fade_begin = 0.0
+distance_fade_shadow = 0.0
+spot_range = 0.346645
+spot_angle = 15.0
+
+[node name="RearLight" type="SpotLight3D" parent="Lights/LightsRR"]
+transform = Transform3D(-4.37114e-08, 0, -1, 0, 1, 0, 1, 0, -4.37114e-08, 1.95618, 0.35, 0.631)
+light_color = Color(1, 0, 0, 1)
+light_energy = 16.0
+shadow_enabled = true
+distance_fade_enabled = true
+spot_range = 10.0
